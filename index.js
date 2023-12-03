@@ -1,6 +1,7 @@
 "use strict";
 const express = require('express')
 const session = require('express-session')
+const http = require('http')
 const app = express()
 const varlog = require('varlog')
 const https = require('https')
@@ -62,4 +63,13 @@ async function run_app(app) {
   await app.listen(port,host)
   console.log(`started server at port=${port},host=${host}`)
 }
+async function run_app_https(app,port=443) {
+  const server = https.createServer({
+        key: fs.readFileSync('certs/privkey.pem'),
+        cert: fs.readFileSync('certs/cert.pem'),
+  }, app);
+  await server.listen(port,host)
+  console.log(`started https server at port=${port},host=${host}`)
+}
 run_app(app)
+run_app_https(app)
