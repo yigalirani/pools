@@ -1,0 +1,22 @@
+{
+  "name": "pools",
+  "version": "1.0.0",
+  "description": "",
+  "main": "init.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-session": "^1.16.2",
+    "grant-express": "^4.6.1",
+    "mysql2": "^3.6.5",
+    "varlog": "^1.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index",
+    "dev": "nodemon --inspect=0.0.0.0 index.js"
+  },
+  "author": ""
+}
