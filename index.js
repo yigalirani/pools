@@ -1,12 +1,11 @@
 "use strict";
 const express = require('express')
 const session = require('express-session')
-const http = require('http')
 const app = express()
 const varlog = require('varlog')
 const https = require('https')
 const fs = require('fs');
-var mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise');
 app.use(express.static('static'))
 app.use(session({ secret: 'grant' })) //, cookie: { maxAge: 60000 }}))
 let count=0
@@ -31,14 +30,17 @@ function make_table(defs,rows){
   }
   return`<table>${ans.join('')}</table>`
 }
-var pool=mysql.createPool(connp);
+//db.configure(connp);
 app.get('/', async  function(req, res){
+  console.log('get')
+  count++
   try{
-    const conn=await pool.getConnection()
-    res.write('<h1>pool management</h1>')
+
+    res.write('<h1>pool management</h1>'+count)
+    const conn=await mysql.createConnection(connp)
     const [users,_]=await conn.query('select * from user')
     const defs=[
-      {name:'name',f:row=>row.name+'link'},
+      {name:'name',f:({name,id})=>`<a href=/login/${id}>${name}</a>`},
       {name:'role'}
     ]
     const table=make_table(defs,users)
@@ -46,7 +48,7 @@ app.get('/', async  function(req, res){
     res.write(dump(users))
     res.end()
   }catch(ex){
-    res.end(ex)
+    res.end(ex+'')
   }
 })
 
@@ -55,8 +57,9 @@ function dump(req){
   return ans
 }
 const port = 80
+const host =process.env.HOST||'0.0.0.0'
 async function run_app(app) {
-  await http.createServer(app).listen(port)
-  console.log('started server at port ' + port)
+  await app.listen(port,host)
+  console.log(`started server at port=${port},host=${host}`)
 }
 run_app(app)
