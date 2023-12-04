@@ -46,43 +46,49 @@ app.get('/login/:userid', async  function(req, res){
   //res.end()
 })
 
-function title(page,res){
+function page({res,title='',content='',loggedin='',ex=''}){
   count++
-  
-  res.write(`
-  <html>
+  if (ex)
+    ex='<pre>'+JSON.stringify(ex,null,2)+'</pre>'
+  if (loggedin)
+    loggedin='<div class=loggedin>'+loggedin+' (<a href=/logout>logout)</a></div>'
+  const html=`
+<html>
+<meta content="width=device-width, initial-scale=1" name="viewport" />
   <link rel="stylesheet" href="/style.css"> 
-  <body><h1>Pool Management System ${count}</h1><h2>${page}</h2>`)
+  <body>
+    <div class='titlebar'><h1>Pools Operations Management</h1>${loggedin}</div>
+    <h2>${title}</h2>
+    ${content}(${count})
+  </body>
+</html>
+  `
+  res.write(html)
+  res.end()
 }
 async function query_one(conn,query,params){
   const [ans,_fields]=await conn.query(query,params)
   return ans[0]
 }
-async function write_user_main_page(userid,res,conn){
+async function write_user_main_page({userid,res,conn}){
   const {id,name,role}=await query_one(conn,'select * from user where id=?',[userid])
-  title(`user ${name} (${role}) is logged in`,res)
-  res.write('<a href=/logout>logout</a>')
-  res.end()
+  page({res,loggedin:`${name} (${role})`})
 }
 app.get('/', async  function(req, res){
-  console.log('get')
   try{
     const conn=await mysql.createConnection(connp)
     const {userid}=req.session
     if (userid!=null)
-      return write_user_main_page(userid,res,conn)
-    title('select user',res)
+      return write_user_main_page({res,userid,conn})
     const [users,_]=await conn.query('select * from user')
     const defs=[
       {name:'name',f:({name,id})=>`<a href="login/${id}">${name}</a>`},
       {name:'role'}
     ]
     const table=make_table(defs,users)
-    res.write(table)
-    res.write(dump(users))
-    res.end()
+    page({res,title:'select user',content:table})
   }catch(ex){
-    res.end(ex+'')
+    page({res,content:'error',ex})
   }
 })
 
