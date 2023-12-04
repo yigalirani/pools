@@ -52,21 +52,26 @@ function title(page,res){
   res.write(`
   <html>
   <link rel="stylesheet" href="/style.css"> 
-  <body>${count}<h1>pool management</h1><h2>${page}</h2>`)
+  <body><h1>Pool Management System ${count}</h1><h2>${page}</h2>`)
 }
-function write_user_main_page(userid,res){
-  title(`user ${userid} is logged in`,res)
+async function query_one(conn,query,params){
+  const [ans,_fields]=await conn.query(query,params)
+  return ans[0]
+}
+async function write_user_main_page(userid,res,conn){
+  const {id,name,role}=await query_one(conn,'select * from user where id=?',[userid])
+  title(`user ${name} (${role}) is logged in`,res)
   res.write('<a href=/logout>logout</a>')
   res.end()
 }
 app.get('/', async  function(req, res){
   console.log('get')
   try{
+    const conn=await mysql.createConnection(connp)
     const {userid}=req.session
     if (userid!=null)
-      return write_user_main_page(userid,res)
+      return write_user_main_page(userid,res,conn)
     title('select user',res)
-    const conn=await mysql.createConnection(connp)
     const [users,_]=await conn.query('select * from user')
     const defs=[
       {name:'name',f:({name,id})=>`<a href="login/${id}">${name}</a>`},
