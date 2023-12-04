@@ -59,7 +59,7 @@ function page({res,title='',content='',loggedin='',ex=''}){
   <body>
     <div class='titlebar'><h1>Pools Operations Management</h1>${loggedin}</div>
     <h2>${title}</h2>
-    ${content}(${count})
+    ${content}  (click counter:${count})
   </body>
 </html>
   `
@@ -72,7 +72,24 @@ async function query_one(conn,query,params){
 }
 async function write_user_main_page({userid,res,conn}){
   const {id,name,role}=await query_one(conn,'select * from user where id=?',[userid])
-  page({res,loggedin:`${name} (${role})`})
+  if (role=='owner'){
+    const qres=await conn.query(`select 
+    asset.name as asset_name,
+    count(pool.id) as pools
+  from asset,pool 
+  where 
+    pool.asset_id=asset.id and
+    asset.owner_user_id=4
+  group by asset.id`,[userid])
+    const defs=[
+      {name:'asset_name'},
+      {name:'pools'}
+      
+    ]
+    const [assets,_]=qres
+    const content=make_table(defs,assets) 
+    return page({res,loggedin:`${name} (${role})`,content,title:'your assets'})   
+  }
 }
 app.get('/', async  function(req, res){
   try{

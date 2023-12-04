@@ -1,7 +1,8 @@
+
 create database if not exists pools;
 use	 pools;
 
-drop table if exists user,pool,asset,theasset;
+drop table if exists user,pool,asset,permissions,pool_check_record;
 create table if not exists user(
 	id int AUTO_INCREMENT primary key,
 	name varchar(100) unique, 
@@ -39,10 +40,11 @@ insert into user (id,name,role) values (3,'boaz.operator@gmail.com','operator');
 insert into user (id,name,role) values (4,'shlomo.owner@gmail.com','owner');
 insert into user (id,name,role) values (5,'david.owner@gmail.com','owner');
 
-insert into asset (id,name,owner_user_id) values(1,'shlomo pools ltd',4);
+insert into asset (id,name,owner_user_id) values(1,'Kfar Macabia',4);
 
-insert into pool(id,asset_id,name,status) values(1,1,'shlomo first pool','pool is functional with minor problem');
-insert into pool(id,asset_id,name,status) values(2,1,'shlomo second pool','under renovations');
+insert into pool(id,asset_id,name,status) values(1,1,'Big Pool 1','pool is functional with minor problem');
+insert into pool(id,asset_id,name,status) values(2,1,'Big Pool 2','under renovations');
+insert into pool(id,asset_id,name,status) values(3,1,'Small Pool 1','under renovations');
 
 insert into permissions(opeator_user_id,pool_id) values(1,1);
 insert into permissions(opeator_user_id,pool_id) values(2,2);
