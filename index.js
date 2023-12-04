@@ -49,7 +49,10 @@ app.get('/login/:userid', async  function(req, res){
 function title(page,res){
   count++
   
-  res.write(`<html>${count}<h1>pool management</h1><h2>${page}</h2>`)
+  res.write(`
+  <html>
+  <link rel="stylesheet" href="/style.css"> 
+  <body>${count}<h1>pool management</h1><h2>${page}</h2>`)
 }
 function write_user_main_page(userid,res){
   title(`user ${userid} is logged in`,res)
