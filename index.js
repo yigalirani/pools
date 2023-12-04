@@ -16,6 +16,7 @@ const connp={
   password:'cosbypools',//todo: move this to env var lol
   database:'pools'
 }
+
 function make_table(defs,rows){
   const th=defs.map(def=>`<th>${def.name}</th>`).join('')
   const title_row=`<tr>${th}</tr>`
@@ -31,17 +32,41 @@ function make_table(defs,rows){
   }
   return`<table>${ans.join('')}</table>`
 }
-//db.configure(connp);
+app.get('/logout/',function(req, res){
+  req.session.userid=null
+  res.redirect('/')
+})
+app.get('/login/:userid', async  function(req, res){
+  //title('logged in',res)
+  const {userid}=req.params
+  req.session.userid=userid
+  //res.write(userid)
+  res.redirect('/')
+  //res.write(dump(req))
+  //res.end()
+})
+
+function title(page,res){
+  count++
+  
+  res.write(`<html>${count}<h1>pool management</h1><h2>${page}</h2>`)
+}
+function write_user_main_page(userid,res){
+  title(`user ${userid} is logged in`,res)
+  res.write('<a href=/logout>logout</a>')
+  res.end()
+}
 app.get('/', async  function(req, res){
   console.log('get')
-  count++
   try{
-
-    res.write('<h1>pool management</h1>'+count)
+    const {userid}=req.session
+    if (userid!=null)
+      return write_user_main_page(userid,res)
+    title('select user',res)
     const conn=await mysql.createConnection(connp)
     const [users,_]=await conn.query('select * from user')
     const defs=[
-      {name:'name',f:({name,id})=>`<a href=/login/${id}>${name}</a>`},
+      {name:'name',f:({name,id})=>`<a href="login/${id}">${name}</a>`},
       {name:'role'}
     ]
     const table=make_table(defs,users)
@@ -54,6 +79,7 @@ app.get('/', async  function(req, res){
 })
 
 function dump(req){
+  return  ''
   const ans=varlog.css+varlog.dump('debug info',req)
   return ans
 }
